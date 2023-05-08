@@ -3,13 +3,14 @@ pipeline
     agent any
     stages
     {
-        stage('ContinuousDownload')
+        stage('ContinuousDownload'){
+            
+        
+        steps
         {
-            steps
-            {
-                git 'https://github.com/intelliqittrainings/maven.git'
-            }
+            git 'https://github.com/prasadcloud/maven2.git'
         }
+       }
         stage('ContinuousBuild')
         {
             steps
@@ -17,41 +18,29 @@ pipeline
                 sh 'mvn package'
             }
         }
-        stage('ContinuousDeployment')
+        stage('ContinuousDeploy')
         {
             steps
             {
-               deploy adapters: [tomcat9(credentialsId: 'bfb67f1d-2f4e-430c-bb8d-30584116bd00', path: '', url: 'http://172.31.51.212:9090')], contextPath: 'test1', war: '**/*.war'
+             deploy adapters: [tomcat9(credentialsId: '89f2d959-95ba-4850-9e44-28989d68e05b', path: '', url: 'http://172.31.31.66:8080')], contextPath: 'testapp2', war: '**/*.war'
             }
         }
-        stage('ContinuousTesting')
+        stage('ContinousTesting')
         {
             steps
             {
-               git 'https://github.com/intelliqittrainings/FunctionalTesting.git'
-               sh 'java -jar /home/ubuntu/.jenkins/workspace/DeclarativePipeline1/testing.jar'
+             git 'https://github.com/prasadcloud/FunctionalTesting.git'
+             sh 'java -jar /var/lib/jenkins/workspace/MyAVDDeclarative1/testing.jar'
             }
         }
-       
-    }
-    
-    post
-    {
-        success
+            stage('ContinousDelivery')
         {
-            input message: 'Need approval from the DM!', submitter: 'srinivas'
-               deploy adapters: [tomcat9(credentialsId: 'bfb67f1d-2f4e-430c-bb8d-30584116bd00', path: '', url: 'http://172.31.50.204:9090')], contextPath: 'prod1', war: '**/*.war'
+            steps
+            {
+             
+             input message: 'Please approve deployment', submitter: 'srinivas'
+             sh 'scp /var/lib/jenkins/workspace/MyAVDDeclarative1/webapp/target/webapp.war  ubuntu@172.31.23.145:/var/lib/tomcat9/webapps/prod1.war'
+            }
         }
-        failure
-        {
-            mail bcc: '', body: 'Continuous Integration has failed', cc: '', from: '', replyTo: '', subject: 'CI Failed', to: 'selenium.saikrishna@gmail.com'
-        }
-       
     }
-    
-    
-    
-    
-    
-    
 }
