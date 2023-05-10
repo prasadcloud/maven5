@@ -1,4 +1,4 @@
-ipipeline
+pipeline
 {
     agent any
     stages
@@ -41,5 +41,7 @@ ipipeline
                 }
             }
         }
+			
+    }
 }
-}
+
