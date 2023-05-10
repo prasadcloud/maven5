@@ -1,0 +1,23 @@
+@Library('mylibrary1')_
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('Caluculations Maths')
+        {
+            steps
+            {
+                script{
+                    calc.sum(10,20)
+                    calc.mul(20,40)
+                    calc.subt(30,20)
+                    calc.divi(80,20)
+                    calc.sum(30,80)
+                    calc.divi(30,90)
+                
+                }
+            }
+        }
+    }
+}
