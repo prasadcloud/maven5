@@ -1,0 +1,49 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('ContinousDownload')
+        {
+            steps
+            {
+                git 'https://github.com/prasadcloud/maven2.git'
+            }
+        }
+        stage('ContinousBuild')
+        {
+            steps
+            {
+                sh 'mvn packages'
+            }
+        }
+        stage('ContinousDeploy')
+        {
+            steps
+            {
+                deploy adapters: [tomcat9(credentialsId: '9467dedd-d288-405a-b286-2e60c4a032b2', path: '', url: 'http://172.31.31.66:8080')], contextPath: 'testavd1', war: '**/*.war'
+            }
+        }
+        stage('ContinousTesting')
+        {
+            steps
+            {
+                git 'https://github.com/prasadcloud/FunctionalTesting.git'
+                sh 'java -jar /var/lib/jenkins/workspace/MyAVDDeclarativePost1/testing.jar'
+            }
+        }
+    }
+    post
+    {
+        success
+        {
+            input id: 'Myadmin', message: 'Please Approve Delivery to Prod'
+            deploy adapters: [tomcat9(credentialsId: '9467dedd-d288-405a-b286-2e60c4a032b2', path: '', url: 'http://172.31.23.145:8080')], contextPath: 'prodavd1', war: '**/*.war'
+        }
+        failure
+        {
+            mail bcc: '', body: 'CI CD failed please look into it.', cc: '', from: '', replyTo: '', subject: 'CI/CD failed', to: 'prasad.cloud85@gmail.com'
+        }
+    }
+    
+}

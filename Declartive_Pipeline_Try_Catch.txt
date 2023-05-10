@@ -1,0 +1,99 @@
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('ContinousDownload')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        git 'https://github.com/prasadcloud/maven2.git'
+                    }
+                    catch(Exception e1)
+                    {
+                        mail bcc: '', body: 'GIT Admins, Continous Download failed please check therepo', cc: '', from: '', replyTo: '', subject: 'Continous Download Failed', to: 'prasad.cloud85@gmail.com'
+                        exit(1)
+                    }
+                }
+            }
+        }
+                    stage('ContinousBuild')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                        sh 'mvn package'
+                    }
+                    catch(Exception e2)
+                    {
+                        mail bcc: '', body: 'DevTeam, Continous BUild failed please check', cc: '', from: '', replyTo: '', subject: 'Continous Build Failed', to: 'prasad.cloud85@gmail.com'
+                        exit(1)
+                        
+                        
+                    }
+                }
+            }
+        }
+			stage('ContinousDeploy')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                     deploy adapters: [tomcat9(credentialsId: '9467dedd-d288-405a-b286-2e60c4a032b2', path: '', url: 'http://172.31.31.66:8080')], contextPath: 'testavd2', war: '**/*.war'   
+                    }
+                    catch(Exception e3)
+                    {
+                        mail bcc: '', body: 'Middleware, Continous Deploy failed please check', cc: '', from: '', replyTo: '', subject: 'Continous Deploy Failed', to: 'prasad.cloud85@gmail.com'
+                        exit(1)
+                    }
+                }
+            }
+        }
+			stage('ContinousTesting')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                     git 'https://github.com/prasadcloud/FunctionalTesting.git'
+					 sh 'java -jar /var/lib/jenkins/workspace/MyAVDDeclarativeTryCatch/testing.jar'
+                    }
+                    catch(Exception e4)
+                    {
+                        mail bcc: '', body: 'TestTeam, Continous Test failed please check', cc: '', from: '', replyTo: '', subject: 'Continous Test Failed', to: 'prasad.cloud85@gmail.com'
+                        exit(1)
+                    }
+                }
+            }
+        }
+		stage('ContinousDelivery')
+        {
+            steps
+            {
+                script
+                {
+                    try
+                    {
+                     deploy adapters: [tomcat9(credentialsId: '9467dedd-d288-405a-b286-2e60c4a032b2', path: '', url: 'http://172.31.23.146:8080')], contextPath: 'prodavd2', war: '**/*.war'
+                    }
+                    catch(Exception e5)
+                    {
+                        mail bcc: '', body: 'DeliveryTeam, Continous Delivery failed please check', cc: '', from: '', replyTo: '', subject: 'Continous Delivery Failed', to: 'prasad.cloud85@gmail.com'
+                    }
+                }
+            }
+        }
+    }
+}
