@@ -1,37 +1,45 @@
-pipeline
+ipipeline
 {
     agent any
     stages
     {
-        stage('ContinuousDownload'){
-            
-        
-        steps
-        {
-            git 'https://github.com/prasadcloud/maven2.git'
-        }
-       }
-        stage('ContinuousBuild')
+        stage('ContinousDownload')
         {
             steps
             {
-                sh 'mvn package'
+                script
+                {
+                    try
+                    {
+                        git 'https://github.com/prasadcloud/maven2.git'
+                    }
+                    catch(Exception e1)
+                    {
+                        mail bcc: '', body: 'GIT Admins, Continous Download failed please check therepo', cc: '', from: '', replyTo: '', subject: 'Continous Download Failed', to: 'prasad.cloud85@gmail.com'
+                        exit(1)
+                    }
+                }
             }
         }
-        stage('ContinuousDeploy')
+                    stage('ContinousBuild')
         {
             steps
             {
-             sh 'scp /var/lib/jenkins/workspace/MyAVDShared2/webapp/target/webapp.war ubuntu@172.31.26.206:/var/lib/tomcat9/webapps/testAVD1.war'
+                script
+                {
+                    try
+                    {
+                        sh 'mvn package'
+                    }
+                    catch(Exception e2)
+                    {
+                        mail bcc: '', body: 'DevTeam, Continous BUild failed please check', cc: '', from: '', replyTo: '', subject: 'Continous Build Failed', to: 'prasad.cloud85@gmail.com'
+                        exit(1)
+                        
+                        
+                    }
+                }
             }
         }
-        stage('ContinousTesting')
-        {
-            steps
-            {
-             git 'https://github.com/prasadcloud/FunctionalTesting.git'
-             sh 'java -jar /var/lib/jenkins/workspace/MyAVDShared2/testing.jar'
-            }
-        }
-    }
+}
 }
