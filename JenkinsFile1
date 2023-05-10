@@ -22,7 +22,7 @@ pipeline
         {
             steps
             {
-             deploy adapters: [tomcat9(credentialsId: '114b4f79-87a4-46d3-9f42-a21bf37b17ad', path: '', url: 'http://172.31.13.164:8080')], contextPath: 'testapp2', war: '**/*.war'
+             sh 'scp /var/lib/jenkins/workspace/MyAVDShared2/webapp/target/webapp.war ubuntu@172.31.26.206:/var/lib/tomcat9/webapps/testAVD1.war'
             }
         }
         stage('ContinousTesting')
@@ -30,15 +30,7 @@ pipeline
             steps
             {
              git 'https://github.com/prasadcloud/FunctionalTesting.git'
-             sh 'java -jar /var/lib/jenkins/workspace/DeclarativePipeline1/testing.jar'
-            }
-        }
-            stage('ContinousDelivery')
-        {
-            steps
-            {
-             input message: 'Need Approval from Dev Lead', submitter: 'srini'
-             deploy adapters: [tomcat9(credentialsId: 'bfda19c6-2e25-4428-b56e-dd079052d2e7', path: '', url: 'http://172.31.4.50:8080')], contextPath: 'prodapp1', war: '**/*.war'
+             sh 'java -jar /var/lib/jenkins/workspace/MyAVDShared2/testing.jar'
             }
         }
     }
